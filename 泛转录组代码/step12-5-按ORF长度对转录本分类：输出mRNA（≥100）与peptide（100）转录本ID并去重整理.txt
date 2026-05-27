@@ -1,0 +1,38 @@
+# 定义输入文件和输出文件
+input_file = 'sorted_processed_gene_orfs.txt'
+peptide_output_file = 'peptide_transcript_id.txt'
+mrna_output_file = 'mRNA_transcript_id.txt'
+
+# 用于存储不同类别的转录本ID
+peptide_transcripts = set()
+mrna_transcripts = set()
+
+# 读取输入文件并根据ORF长度分类
+with open(input_file, 'r') as file:
+    for line in file:
+        # 以空格分割每行数据
+        parts = line.split()
+        transcript_id = parts[1]  # 第二列是转录本ID
+        orf_length = int(parts[2])  # 第三列是ORF长度
+
+        # 根据ORF长度分类
+        if orf_length < 100:
+            peptide_transcripts.add(transcript_id)
+        else:
+            mrna_transcripts.add(transcript_id)
+
+# 将ORF > 100的转录本ID输出到alta_mRNA_transcript_id.txt
+with open(mrna_output_file, 'w') as mrna_file:
+    for transcript in sorted(mrna_transcripts):
+        mrna_file.write(transcript + '\n')
+
+# 从 alta_peptide_transcript_id.txt 中去除已经在 alta_mRNA_transcript_id.txt 中的ID
+peptide_transcripts = peptide_transcripts - mrna_transcripts
+
+# 将处理后的结果输出到 alta_peptide_transcript_id.txt
+with open(peptide_output_file, 'w') as pep_file:
+    for transcript in sorted(peptide_transcripts):
+        pep_file.write(transcript + '\n')
+
+print("文件已生成：alta_peptide_transcript_id.txt 和 alta_mRNA_transcript_id.txt")
+

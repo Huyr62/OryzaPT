@@ -1,0 +1,14 @@
+samples=$(cat /public/home/huyr/Oryza_public_data/wild/S2/download/Oryza_alta/09stringtie_e_S2S3/sample_name.txt)
+
+for sample in $samples
+do
+    stringtie /public/home/huyr/Oryza_public_data/wild/S2/download/Oryza_alta/04hisat_output/${sample}.sorted.bam \
+              -o /public/home/huyr/Oryza_public_data/wild/S2/download/Oryza_alta/09stringtie_e_S2S3_ref/${sample}/${sample}.gtf \
+              -p 10 \
+              -G /public/home/huyr/Oryza_public_data/wild/S2/download/Oryza_alta/09stringtie_merge_S2S3_ref/alta_merged.gtf \
+              -e -B -l ${sample} \
+              -A /public/home/huyr/Oryza_public_data/wild/S2/download/Oryza_alta/09stringtie_e_S2S3_ref/${sample}/${sample}_gene_abund.txt
+
+done
+echo "----------- Finished at -----------"
+date

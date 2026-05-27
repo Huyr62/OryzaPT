@@ -1,0 +1,3 @@
+gffcompare -R -r /public/home/huyr/Oryza/genome/00.ref_genome/gff3_to_gtf/Oryza_alta_W-18_genome.fasta.gtf \
+           -o /public/home/huyr/Oryza_public_data/wild/S2/download/Oryza_alta/09gffcompare_S2S3/result /public/home/huyr/Oryza_public_data/wild/S2/download/Oryza_alta/09stringtie_merge_S2S3/alta_S2S3_merged.gtf
+

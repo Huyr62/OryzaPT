@@ -1,0 +1,13 @@
+# 读取样本名称文件，并将其保存到变量 'samples' 中
+samples=$(cat /public2/huyr/Oryza_public_data/cultivated/S3/Oryza_sativa_indica/01fastq_output/sample_name.txt)
+# 定义 minimap2 索引路径
+minimap2_index_path="/public/home/huyr/Oryza/genome/04.minimap_index/Oryza_indica/Oryza_indica.mmi"
+# 循环处理每个样本
+for sample in $samples
+do
+    # 使用 minimap2 进行比对
+    minimap2 -ax splice:hq $minimap2_index_path /public2/huyr/Oryza_public_data/cultivated/S3/Oryza_sativa_indica/01fastq_output/${sample}.fastq > /public2/huyr/Oryza_public_data/cultivated/S3/Oryza_sativa_indica/02minimap2/${sample}.sam
+    # 使用 samtools 将 .sam 文件转换为 .bam 文件并排序
+    samtools view -@10 -bS /public2/huyr/Oryza_public_data/cultivated/S3/Oryza_sativa_indica/02minimap2/${sample}.sam | \
+    samtools sort -@10 -o /public2/huyr/Oryza_public_data/cultivated/S3/Oryza_sativa_indica/02minimap2/${sample}.sorted.bam
+done

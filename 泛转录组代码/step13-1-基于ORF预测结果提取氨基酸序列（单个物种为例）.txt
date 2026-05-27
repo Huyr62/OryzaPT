@@ -1,0 +1,154 @@
+import re
+from collections import defaultdict
+
+# =========================
+# Step 1: 读取 test.out → 提取 transcript ID（lcl|后）
+# =========================
+def step1_extract_ids(input_file, output_file):
+    with open(input_file, 'r') as fin, open(output_file, 'w') as fout:
+        for line in fin:
+            if line.startswith('>'):
+                match = re.match(r'>lcl\|([^:]+)', line)
+                if match:
+                    fout.write(f">{match.group(1)}\n")
+                else:
+                    fout.write(line)
+            else:
+                fout.write(line)
+
+
+# =========================
+# Step 2: 去掉 ORF编号（ORF1_等）
+# =========================
+def step2_clean_orf(input_file, output_file):
+    with open(input_file, 'r') as fin, open(output_file, 'w') as fout:
+        for line in fin:
+            if line.startswith('>'):
+                line = re.sub(r'>ORF\d+_', '>', line)
+            fout.write(line)
+
+
+# =========================
+# Step 3: 提取每个转录本最长ORF
+# =========================
+def step3_longest_orf(input_file, output_file):
+    sequences = defaultdict(list)
+
+    current_id = None
+    current_seq = []
+
+    with open(input_file, 'r') as fin:
+        for line in fin:
+            line = line.strip()
+            if line.startswith('>'):
+                if current_id:
+                    sequences[current_id].append(''.join(current_seq))
+                current_id = line[1:]
+                current_seq = []
+            else:
+                current_seq.append(line)
+
+        if current_id:
+            sequences[current_id].append(''.join(current_seq))
+
+    longest_orfs = {
+        tid: max(seq_list, key=len)
+        for tid, seq_list in sequences.items()
+    }
+
+    with open(output_file, 'w') as fout:
+        for tid, seq in longest_orfs.items():
+            fout.write(f">{tid}\n{seq}\n")
+
+
+# =========================
+# Step 4: transcript → gene 替换
+# =========================
+def step4_trans_to_gene(fasta_file, map_file, output_file, unmatched_file):
+    trans_to_gene = {}
+
+    with open(map_file, 'r') as fin:
+        for line in fin:
+            gene, trans = line.strip().split()
+            trans_to_gene[trans] = gene
+
+    modified = []
+    unmatched = []
+
+    with open(fasta_file, 'r') as fin:
+        for line in fin:
+            if line.startswith('>'):
+                tid = line[1:].strip().split()[0]
+                if tid in trans_to_gene:
+                    modified.append(">" + trans_to_gene[tid] + "\n")
+                else:
+                    modified.append(line)
+                    unmatched.append(tid)
+            else:
+                modified.append(line)
+
+    with open(output_file, 'w') as fout:
+        fout.writelines(modified)
+
+    with open(unmatched_file, 'w') as fout:
+        fout.write("\n".join(unmatched))
+
+
+# =========================
+# Step 5: 每个gene保留最长蛋白
+# =========================
+def step5_final_longest(input_file, output_file):
+    sequences = defaultdict(str)
+
+    current_id = None
+    current_seq = []
+
+    with open(input_file, 'r') as fin:
+        for line in fin:
+            line = line.strip()
+            if line.startswith('>'):
+                if current_id:
+                    seq = ''.join(current_seq)
+                    if len(seq) > len(sequences[current_id]):
+                        sequences[current_id] = seq
+                current_id = line[1:]
+                current_seq = []
+            else:
+                current_seq.append(line)
+
+        if current_id:
+            seq = ''.join(current_seq)
+            if len(seq) > len(sequences[current_id]):
+                sequences[current_id] = seq
+
+    with open(output_file, 'w') as fout:
+        for gid, seq in sequences.items():
+            fout.write(f">{gid}\n{seq}\n")
+
+
+# =========================
+# 主流程执行
+# =========================
+if __name__ == "__main__":
+
+    # Step 1
+    step1_extract_ids("test.out", "or1.fasta")
+
+    # Step 2
+    step2_clean_orf("or1.fasta", "or2.fasta")
+
+    # Step 3
+    step3_longest_orf("or2.fasta", "or3.fasta")
+
+    # Step 4
+    step4_trans_to_gene(
+        fasta_file="or3.fasta",
+        map_file="gene_to_trans_ids.txt",
+        output_file="or4_2.fasta",
+        unmatched_file="unmatched_transcripts.txt"
+    )
+
+    # Step 5
+    step5_final_longest("or4_2.fasta", "Oryza_alta.faa")
+
+    print("Pipeline finished successfully.")

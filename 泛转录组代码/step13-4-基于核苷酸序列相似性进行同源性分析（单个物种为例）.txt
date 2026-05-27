@@ -1,0 +1,1 @@
+blastn -query /public/home/huyr/Oryza_public_data/Blastn/0511/specific_nc_gene/00lncRNA_trans_seq/alta_blast_transcripts.fasta -db /public/home/huyr/Oryza/genome/06blastn_db/22_species_2/alta_db -out /public/home/huyr/Oryza_public_data/Blastn/0602/species_nc/01alta_result_class/result.out -outfmt 6 -evalue 1e-5 -num_alignments 10

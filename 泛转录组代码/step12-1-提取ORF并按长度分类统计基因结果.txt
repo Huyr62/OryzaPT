@@ -1,0 +1,86 @@
+#提取ORF并按长度分类统计基因结果
+def extract_orf_data(gene_ids_file, test_out_file, found_file, not_found_file, orf_10_to_100_file, orf_100_file):
+    # 读取基因ID列表
+    with open(gene_ids_file, 'r') as f:
+        gene_ids = set(line.strip() for line in f)
+
+    # 打开输出文件
+    with open(found_file, 'w') as found_out, open(not_found_file, 'w') as not_found_out, \
+         open(orf_10_to_100_file, 'w') as orf_10_to_100, open(orf_100_file, 'w') as orf_100:
+        
+        # 读取test.out文件
+        with open(test_out_file, 'r') as infile:
+            orf_data = {}
+            gene_id = None
+            protein_sequence = []
+
+            for line in infile:
+                if line.startswith(">"):
+                    # 提取基因ID
+                    header = line.strip().split(":")
+                    orf_gene_id = header[0].split("|")[1].split("_")[1]
+
+                    # 检查基因ID是否在我们需要的ID列表中
+                    if orf_gene_id in gene_ids:
+                        if gene_id and protein_sequence:
+                            # 如果已经处理了前一个基因ID，保存其信息
+                            if gene_id not in orf_data:
+                                orf_data[gene_id] = []
+                            orf_data[gene_id].append("".join(protein_sequence))
+                            protein_sequence = []
+                        
+                        # 更新当前基因ID
+                        gene_id = orf_gene_id
+
+                    else:
+                        # 如果当前基因ID没有在gene_ids中，继续处理
+                        gene_id = None
+
+                else:
+                    if gene_id:
+                        # 只在匹配的基因ID时收集氨基酸序列
+                        protein_sequence.append(line.strip())
+
+            # 处理最后一个基因的ORF数据
+            if gene_id and protein_sequence:
+                if gene_id not in orf_data:
+                    orf_data[gene_id] = []
+                orf_data[gene_id].append("".join(protein_sequence))
+
+            # 写入找到的基因ID和对应的氨基酸序列
+            found_gene_ids = set()
+            for gene_id, sequences in orf_data.items():
+                # 选择最长的ORF
+                longest_orf = max(sequences, key=len)
+                found_out.write(f"{gene_id}\t{longest_orf}\t{len(longest_orf)}\n")
+                found_gene_ids.add(gene_id)
+
+                # 根据ORF的长度分类
+                orf_length = len(longest_orf)
+                if 10 <= orf_length <= 100:
+                    orf_10_to_100.write(f"{gene_id}\n")
+                elif orf_length > 100:
+                    orf_100.write(f"{gene_id}\n")
+
+            # 写入没有找到的基因ID
+            not_found_gene_ids = gene_ids - found_gene_ids
+            for gene_id in not_found_gene_ids:
+                not_found_out.write(f"{gene_id}\n")
+
+    # 打印统计结果
+    print(f"Number of found gene IDs: {len(found_gene_ids)}")
+    print(f"Number of gene IDs not found: {len(not_found_gene_ids)}")
+
+
+if __name__ == "__main__":
+    gene_ids_file = "gene_ids.txt"  # 输入的基因ID文件
+    test_out_file = "test.out"  # 输入的ORF finder输出文件
+    found_file = "found_gene_orfs.txt"  # 输出文件，包含找到的基因ID、氨基酸序列和长度
+    not_found_file = "not_found_gene_ids.txt"  # 输出文件，包含没有找到的基因ID
+    orf_10_to_100_file = "orf_10_to_100.txt"  # 输出文件，包含ORF长度在10到100之间的基因ID
+    orf_100_file = "orf_100.txt"  # 输出文件，包含ORF长度大于100的基因ID
+
+    extract_orf_data(gene_ids_file, test_out_file, found_file, not_found_file, orf_10_to_100_file, orf_100_file)
+    print("Process completed. Results are written to output files.")
+
+

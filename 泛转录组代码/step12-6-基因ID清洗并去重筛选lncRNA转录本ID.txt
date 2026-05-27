@@ -1,0 +1,2 @@
+sed 's/\.[0-9]*$//g' not_found_gene_ids.txt > modified_gene_ids.txt
+sort modified_gene_ids.txt | uniq > lncRNA_transcript_id.txt

@@ -1,0 +1,10 @@
+# 定义输入文件和输出目录
+SRA_LIST="/public/home/huyr/Oryza_public_data/wild/S2/Oryza_alta/sra_list.txt"
+SRA_DIR="/public/home/huyr/Oryza_public_data/wild/S2/Oryza_alta"
+OUTPUT_DIR="/public/home/huyr/Oryza_public_data/wild/S2/Oryza_alta/01fastq_output"
+
+# 创建输出目录
+mkdir -p $OUTPUT_DIR
+
+# 使用 parallel 工具并行处理 SRA 文件，转换为 FASTQ 格式
+cat $SRA_LIST | parallel -j 8 "fastq-dump --split-files --outdir $OUTPUT_DIR ${SRA_DIR}/{}"

@@ -1,0 +1,17 @@
+# 读取样本名称文件 
+# 并将其保存到变量 'samples' 中
+samples=$(cat /public/home/huyr/Oryza_public_data/wild/S2/download/Oryza_alta/03fastp_output/sample_name.txt)
+
+for sample in $samples
+do
+    /public/home/xujw/Oryza/biosoft/stringtie-VER/stringtie-3.0.0.Linux_x86_64/stringtie /public/home/huyr/Oryza_public_data/wild/S2/download/Oryza_alta/04hisat_output/${sample}.sorted.bam \
+              -o /public/home/huyr/Oryza_public_data/wild/S2/download/Oryza_alta/07stringtie3/${sample}/${sample}.gtf \
+              -p 10 \
+              -G /public/home/huyr/Oryza/genome/00.ref_genome/gff3_to_gtf/Oryza_alta_W-18_genome.fasta.gtf \
+              -B -l ${sample} \
+              -A /public/home/huyr/Oryza_public_data/wild/S2/download/Oryza_alta/07stringtie3/${sample}/${sample}_gene_abund.txt
+
+done
+echo "----------- Finished at -----------"
+date
+

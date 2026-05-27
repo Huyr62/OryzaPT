@@ -1,0 +1,1 @@
+/public/home/xujw/Oryza/biosoft/ORFfinder -in /public/home/huyr/Oryza_public_data/wild/S2/download/Oryza_alta/11ORFfinder_ref/transcripts.fasta -s 0 -ml 10 -out /public/home/huyr/Oryza_public_data/wild/S2/download/Oryza_alta/11ORFfinder_ref/test.out -outfmt 0

@@ -1,0 +1,26 @@
+INPUT_DIR="/public/home/huyr/Oryza_public_data/wild/S2/Oryza_alta/01fastq_output"
+OUTPUT_DIR="/public/home/huyr/Oryza_public_data/wild/S2/Oryza_alta/03fastp_output"
+# 创建输出文件夹（如果不存在的话）
+mkdir -p $OUTPUT_DIR
+
+# 遍历输入目录下的FASTQ文件，并使用fastp进行处理
+for file1 in $INPUT_DIR/*_f1.fastq; do
+    # 获取文件名（不包含路径）
+    filename1=$(basename $file1)
+    # 获取配对的文件（_r2.fastq）
+    filename2="${filename1/_f1.fastq/_r2.fastq}"
+    file2="${INPUT_DIR}/$filename2"
+    # 如果找到配对文件，则处理
+    if [[ -f "$file2" ]]; then
+        # 输出结果文件路径
+        output_file1="${OUTPUT_DIR}/trimmed_${filename1}"
+        output_file2="${OUTPUT_DIR}/trimmed_${filename2}"
+        # 使用fastp进行修剪和去接头（双端数据）
+        fastp -i $file1 -I $file2 -o $output_file1 -O $output_file2 \
+              --cut_front --cut_tail --cut_window_size 4 --cut_mean_quality 20 \
+              --detect_adapter_for_pe --thread 4
+    else
+        echo "配对文件 $file2 不存在，跳过处理."
+    fi
+
+done

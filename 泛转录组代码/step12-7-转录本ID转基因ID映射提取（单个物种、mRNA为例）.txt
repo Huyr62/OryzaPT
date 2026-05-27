@@ -1,0 +1,30 @@
+# 设置输入和输出路径
+input_dir="/public/home/huyr/Oryza_public_data/wild/S2/download/00gene_transcripts_id_class/trans/mRNA"
+output_dir="/public/home/huyr/Oryza_public_data/wild/S2/download/00gene_transcripts_id_class/gene/mRNA"  # 你可以修改为你的目标输出路径
+gene_dir="/public/home/huyr/Oryza_public_data/wild/S2/download/00gene_transcripts_id/gene_trans"  # gene_to_trans_ids.txt 文件所在路径
+
+# 确保输出目录存在，如果不存在则创建
+mkdir -p "$output_dir"
+
+# 遍历输入目录下所有的 *_mRNA_transcript_id.txt 文件
+for transcript_file in "$input_dir"/*_mRNA_transcript_id.txt; do
+    # 获取文件名的前缀部分（第一个 _ 之前的部分）
+    prefix=$(basename "$transcript_file" | cut -d'_' -f1)
+    
+    # 获取相应的 gene_to_trans_ids.txt 文件
+    gene_file="$gene_dir/${prefix}_gene_to_trans_ids.txt"
+    
+    # 如果 gene_to_trans_ids.txt 文件存在
+    if [[ -f "$gene_file" ]]; then
+        # 为每个文件创建新的文件名
+        new_file="$output_dir/${prefix}_mRNA_gene_id.txt"
+        
+        # 使用 grep 进行完全匹配（-w），并提取 gene_to_trans_ids.txt 第一列
+        grep -w -F -f "$transcript_file" "$gene_file" | cut -d',' -f1 > "$new_file"
+        
+        echo "Processed $transcript_file -> $new_file"
+    else
+        echo "Gene file for $prefix does not exist: $gene_file"
+    fi
+done
+

@@ -1,0 +1,18 @@
+# 读取样本名称文件 
+# 并将其保存到变量 'samples' 中
+samples=$(cat /public/home/huyr/Oryza_public_data/wild/S2/Oryza_alta/03fastp_output/sample_name.txt)
+
+for sample in $samples
+do
+
+    hisat2 -p 18 --un-conc-gz /public/home/huyr/Oryza_public_data/wild/S2/Oryza_alta/04hisat_output/${sample}.unmapped.gz \
+           --novel-splicesite-outfile /public/home/huyr/Oryza_public_data/wild/S2/Oryza_alta/04hisat_output/${sample}.novalss.bed \
+           -x /public/home/huyr/Oryza/genome/02.hisat_index/oalta_hisat2_index/Oryza_alta_W \
+           -1 /public/home/huyr/Oryza_public_data/wild/S2/Oryza_alta/03fastp_output/${sample}_f1.fastq \
+           -2 /public/home/huyr/Oryza_public_data/wild/S2/Oryza_alta/03fastp_output/${sample}_r2.fastq \
+           -S /public/home/huyr/Oryza_public_data/wild/S2/Oryza_alta/04hisat_output/${sample}.sam
+
+    samtools view -@10 -bS /public/home/huyr/Oryza_public_data/wild/S2/Oryza_alta/04hisat_output/${sample}.sam | \
+    samtools sort -@10 -o /public/home/huyr/Oryza_public_data/wild/S2/Oryza_alta/04hisat_output/${sample}.sorted.bam
+
+done

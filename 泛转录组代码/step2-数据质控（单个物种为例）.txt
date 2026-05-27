@@ -1,0 +1,20 @@
+# 输入和输出目录
+INPUT_DIR=publichomehuyrOryza_public_datawildS2Oryza_alta01fastq_output
+OUTPUT_DIR=publichomehuyrOryza_public_datawildS2Oryza_alta02fastqc_output
+# 创建输出目录
+mkdir -p $OUTPUT_DIR
+# 使用 FastQC 对每个 FASTQ 文件进行质量评估
+for fastq_file in $INPUT_DIR.fastq; do
+    if [[ -f $fastq_file ]]; then
+        # 获取文件的基础名称
+        file_name=$(basename $fastq_file)
+        # 输出当前处理的文件
+        echo Running FastQC on $fastq_file...
+        # 运行 FastQC 并将结果保存在 OUTPUT_DIR
+        fastqc -o $OUTPUT_DIR $fastq_file
+        # 输出完成信息
+        echo $fastq_file quality check completed.
+    else
+        echo No FASTQ files found in $INPUT_DIR
+    fi
+done

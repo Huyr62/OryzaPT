@@ -1,0 +1,31 @@
+awk '
+{
+    gene_id = $1
+    orf_length = $3
+    
+    # 将基因 ID 和对应的 ORF 长度保存到基因字典中
+    if (!(gene_id in genes)) {
+        genes[gene_id] = ""
+    }
+    genes[gene_id] = genes[gene_id] orf_length " "
+}
+END {
+    # 遍历每个基因 ID，检查所有 ORF 长度是否都小于 100
+    for (gene_id in genes) {
+        split(genes[gene_id], lengths, " ")
+        
+        all_small = 1  # 假设所有 ORF 长度都小于 100
+        for (i in lengths) {
+            if (lengths[i] >= 100) {
+                all_small = 0  # 如果有一个 ORF 长度大于或等于 100，设置为 0
+                break
+            }
+        }
+
+        # 如果所有 ORF 长度都小于 100，输出基因 ID
+        if (all_small == 1) {
+            print gene_id
+        }
+    }
+}' sorted_processed_gene_orfs.txt | sort | uniq > peptide_gene_id.txt
+

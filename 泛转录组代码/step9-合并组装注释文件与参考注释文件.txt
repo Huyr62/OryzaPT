@@ -1,0 +1,2 @@
+# 运行 stringtie 合并组装注释文件与参考注释文件
+/public/home/xujw/Oryza/biosoft/stringtie-VER/stringtie-3.0.0.Linux_x86_64/stringtie --merge  -p 10 -G /public/home/huyr/Oryza/genome/00.ref_genome/gtf/Oryza_alta_W-18_genome.fasta.gtf  -o /public/home/huyr/Oryza_public_data/wild/S2/download/Oryza_alta/09stringtie_merge_S2S3_ref/alta_merged.gtf /public/home/huyr/Oryza_public_data/wild/S2/download/Oryza_alta/09stringtie_merge_S2S3_ref/alta_S2S3_merged.gtf

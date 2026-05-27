@@ -1,0 +1,1 @@
+orthofinder -f publichomehuyrOryza_public_dataOrthofinder0608 -t 8 -o publichomehuyrOryza_public_dataOrthofinder0608result

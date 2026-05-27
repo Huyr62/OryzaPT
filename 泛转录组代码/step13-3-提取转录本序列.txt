@@ -1,0 +1,37 @@
+def extract_sequences(fasta_file, transcript_ids_file, output_file):
+    # 读取转录本ID列表
+    with open(transcript_ids_file, 'r') as f:
+        transcript_ids = set(line.strip() for line in f)
+
+    # 打开FASTA文件和输出文件
+    with open(fasta_file, 'r') as f, open(output_file, 'w') as out:
+        seq_id = None
+        seq = []
+        
+        for line in f:
+            line = line.strip()
+            if line.startswith('>'):
+                # 如果当前序列ID在转录本ID列表中，输出该序列
+                if seq_id in transcript_ids:
+                    out.write(f">{seq_id}\n")  # 在ID前添加">"
+                    out.write("".join(seq) + "\n")
+                # 更新序列ID并重置序列内容
+                seq_id = line[1:]  # 去掉 '>' 符号
+                seq = []
+            else:
+                # 记录序列
+                seq.append(line)
+        
+        # 处理最后一条序列
+        if seq_id in transcript_ids:
+            out.write(f">{seq_id}\n")  # 在ID前添加">"
+            out.write("".join(seq) + "\n")
+
+    print(f"提取的序列已保存到 {output_file}")
+
+# 使用示例
+fasta_file = 'mi_merged_transcripts.fasta'  # 输入FASTA文件路径
+transcript_ids_file = 'minuta_lncRNA_transcript_id.txt'  # 输入转录本ID文件路径
+output_file = 'extracted_sequences.fasta'  # 输出提取序列的文件路径
+
+extract_sequences(fasta_file, transcript_ids_file, output_file)
